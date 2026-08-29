@@ -1,0 +1,134 @@
+{
+  "name": "dsh-auto-schedule",
+  "version": "0.3.1",
+  "description": "Durable conversational and Web-managed scheduled Agent, shell, and system-notification tasks for DeepSeek Harness.",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./invariant": {
+      "types": "./lib/types/invariant.d.ts",
+      "default": "./lib/invariant.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/index.js.map",
+    "lib/invariant.js",
+    "lib/invariant.js.map",
+    "lib/client.js",
+    "lib/client.js.map",
+    "lib/types/**/*.d.ts",
+    "lib/types/**/*.d.ts.map",
+    "cordis.patch.yml",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:bundles": "tsdown --config tsdown.config.ts",
+    "build": "npm run clean && npm run build:types && npm run build:bundles",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --exclude tests/packaging/**",
+    "test:coverage": "vitest run --coverage --exclude tests/packaging/**",
+    "test:built": "npm run build && vitest run tests/packaging",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run test && npm run test:coverage && npm run test:built",
+    "prepare": "npm run build",
+    "pack:release": "npm run check && npm pack"
+  },
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh-plugin",
+    "scheduler",
+    "cron",
+    "automation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-agent-default-model": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-agent-presets": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-locale": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-runtime": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-ui-settings": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-invariants": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-session": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-session-title": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-settings": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-shell": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-workspace": "0.1.1-rc.2",
+    "@deepseek-ai/schemastery": "3.18.1"
+  },
+  "dependencies": {
+    "croner": "10.0.1"
+  },
+  "bundledDependencies": [
+    "croner"
+  ],
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-agent-default-model": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-agent-presets": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-locale": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-runtime": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-ui-settings": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-invariants": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-session": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-session-title": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-settings": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-shell": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-workspace": "0.1.1-rc.2",
+    "@deepseek-ai/schemastery": "3.18.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^24.10.1",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "@vitest/coverage-v8": "4.1.11",
+    "jsdom": "^27.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsdown": "^0.22.14",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

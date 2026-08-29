@@ -1,0 +1,136 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AutoScheduleSettingsPage > renders the reviewed task-card structure and runtime projection 1`] = `
+<section
+  class="das-page"
+>
+  <header
+    class="das-header"
+  >
+    <div>
+      <h2>
+        定时任务
+      </h2>
+      <p>
+        通过 Cron、延时、绝对时间或固定间隔，触发主 Agent、命令或系统通知。
+      </p>
+    </div>
+    <button
+      class="das-button das-button-primary"
+      type="button"
+    >
+      新建任务
+    </button>
+  </header>
+  <div
+    class="das-summary"
+  >
+    <span>
+      <b>
+        1
+      </b>
+      任务总数
+    </span>
+    <span>
+      <b>
+        1
+      </b>
+      已启用
+    </span>
+    <span>
+      <b>
+        1
+      </b>
+      待执行
+    </span>
+  </div>
+  <p
+    class="das-sandbox-note"
+  >
+    Agent 任务每次创建独立的顶层会话；模型、工具权限和审批规则继承当前 DSH profile。Shell 任务继续受当前沙箱约束。
+  </p>
+  <ul
+    class="das-tasks"
+  >
+    <li
+      class="das-task"
+      data-state="scheduled"
+    >
+      <div
+        class="das-task-main"
+      >
+        <label
+          class="das-switch"
+          title="立即启用"
+        >
+          <input
+            aria-label="立即启用"
+            checked=""
+            type="checkbox"
+          />
+          <span
+            aria-hidden="true"
+          />
+        </label>
+        <div
+          class="das-task-copy"
+        >
+          <div
+            class="das-task-title-row"
+          >
+            <strong>
+              日报提醒
+            </strong>
+            <span
+              class="das-badge"
+              data-action="notification"
+            >
+              系统通知
+            </span>
+            <span
+              class="das-status"
+              data-state="scheduled"
+            >
+              待执行
+            </span>
+          </div>
+          <p>
+            Cron 0 9 * * * · Asia/Shanghai
+          </p>
+          <div
+            class="das-runtime-grid"
+          >
+            <span>
+              <b>
+                下次执行
+              </b>
+              Aug 25, 2026, 9:00:00 AM
+            </span>
+            <span>
+              <b>
+                最近执行
+              </b>
+              尚未执行
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="das-task-actions"
+      >
+        <button
+          type="button"
+        >
+          编辑
+        </button>
+        <button
+          class="das-danger"
+          type="button"
+        >
+          删除
+        </button>
+      </div>
+    </li>
+  </ul>
+</section>
+`;

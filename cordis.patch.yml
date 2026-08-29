@@ -1,0 +1,18 @@
+- insert:
+    - id: auto-schedule
+      name: dsh-auto-schedule
+      config:
+        allowShellActions: true
+        allowAgentActions: true
+        defaultTimeZone: UTC
+        minIntervalSeconds: 1
+        maxHistoryEntriesPerTask: 50
+        maxShellTimeoutMs: 600000
+        defaultAgentTimeoutMs: 900000
+        maxAgentTimeoutMs: 3600000
+        maxAgentPromptBytes: 65536
+        shellOutputMaxBytes: 16384
+        maxCommandBytes: 32768
+        maxNotificationBytes: 8192
+        notificationTimeoutMs: 15000
+        schedulerRetryMs: 5000
