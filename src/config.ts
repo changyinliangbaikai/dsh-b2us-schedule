@@ -1,5 +1,4 @@
 import z from '@deepseek-ai/schemastery'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 import {
   assertRuntime,
   assertTask,
@@ -9,7 +8,7 @@ import {
   type TaskRuntime,
 } from './domain.js'
 
-export const AUTO_SCHEDULE_NAMESPACE = settingsNamespace('auto-schedule')
+export const AUTO_SCHEDULE_NAMESPACE = 'auto-schedule'
 
 export const DEFAULT_SETTINGS: AutoScheduleSettings = Object.freeze({
   tasks: Object.freeze([]),

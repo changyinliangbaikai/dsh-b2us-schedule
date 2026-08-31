@@ -2,7 +2,7 @@
 import { cleanup } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context, Service } from '@deepseek-ai/cordis'
-import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SettingsScope, SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { DEFAULT_SETTINGS } from '../../src/config.js'
 import type { AutoScheduleSettings } from '../../src/domain.js'
 import { apply, inject, NS } from '../../src/client/index.js'
@@ -27,6 +27,9 @@ class StubScope implements SettingsScope<AutoScheduleSettings> {
   }
   async set(field: string, value: unknown): Promise<void> {
     this.writes.push({ field, value })
+  }
+  mutate(): Promise<void> {
+    return Promise.resolve()
   }
   unset(): Promise<void> {
     return Promise.resolve()

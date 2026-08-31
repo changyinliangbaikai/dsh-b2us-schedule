@@ -24,7 +24,7 @@
 
 - 所有注册必须由当前 Cordis fiber/effect 拥有，并提供 disposer。
 - Client 不允许把 `ctx` 传进 React；数据只能走 Slot inject、selector hook 和 SettingsScope action。
-- 不引入私有 DSH 源码路径。依赖精确锁定到已验证的公共 `0.1.1-rc.2` 接口。
+- 不引入私有 DSH 源码路径。依赖精确锁定到已验证的公共 `0.1.2-alpha.2` 接口。
 - 不用 `tool-bash` 或 ToolRuntime 伪造定时调用；命令执行只走 `ctx.shell`，Agent 只走 `ctx.agents.create` 和 `ctx.sessions.flush`。
 - Settings 的 `tasks` 与 `runtime` 顶层字段必须分别写入，避免不同 owner 的整段替换。
 - 每个修复都添加回归用例；不通过削弱断言或忽略失败让门禁变绿。

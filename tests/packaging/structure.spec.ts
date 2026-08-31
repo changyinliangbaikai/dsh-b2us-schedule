@@ -31,7 +31,8 @@ describe('DSH dual-face package structure', () => {
         bundle: { patch: './cordis.patch.yml' },
         client: {
           inject: [
-            '@deepseek-ai/dsh-client-runtime',
+            '@deepseek-ai/dsh-api-session-controller',
+            '@deepseek-ai/dsh-client-ui-renderer',
             '@deepseek-ai/dsh-client-ui-settings',
             '@deepseek-ai/dsh-client-locale',
           ],

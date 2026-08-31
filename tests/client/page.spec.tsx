@@ -2,7 +2,7 @@
 import { useState, type ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SettingsScopeSnapshot } from '@deepseek-ai/dsh-client-ui-settings/client'
 import { DEFAULT_SETTINGS } from '../../src/config.js'
 import type { AutoScheduleSettings, AutoScheduleTask } from '../../src/domain.js'
 import {

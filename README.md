@@ -61,7 +61,7 @@
 
 ## 构建与测试
 
-要求 Node.js `^22.19.0 || >=24.0.0`，并与 DSH `0.1.1-rc.2` 配套。
+要求 Node.js `^22.19.0 || >=24.0.0`，并与 DSH `0.1.2-alpha.2` 配套。
 
 ```bash
 npm install
@@ -93,7 +93,7 @@ npm pack --dry-run
 ```bash
 npm run build
 npm pack
-dsh plugin --profile web add ./dsh-auto-schedule-0.3.1.tgz
+dsh plugin --profile web add ./dsh-auto-schedule-0.3.2.tgz
 dsh --profile web --dump-config
 ```
 

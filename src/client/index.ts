@@ -1,8 +1,11 @@
 /** Browser half: independent Plugins settings tab over the Host Settings namespace. */
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
+import type {} from '@deepseek-ai/dsh-api-session-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type { ClientContext, SessionId, SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
-import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
+import type { SettingsScope } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { AutoScheduleSettings } from '../domain.js'
 import { AutoScheduleSettingsPage, type AutoScheduleSettingsPageInjected } from './AutoScheduleSettingsPage.js'
 import { en, zh, type AutoScheduleLocaleKey } from './locales.js'
