@@ -1,74 +1,196 @@
-# dsh-auto-schedule
+# dsh-b2us-schedule
 
-`dsh-auto-schedule` 是 DeepSeek Harness（DSH）的持久化定时任务插件。它同时提供 Host 与 Web 两个插件面：Agent 可以在会话中通过工具创建、修改、查看和删除任务，用户也可以在 Web 的“设置 → 插件 → 定时任务”独立页面直接管理。
+**English** | [简体中文](README.zh-CN.md)
 
-## 能力
+Durable scheduled Agent, shell, and desktop-notification tasks for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/DeepSeek-Harness), with both conversational tools and a dedicated Web management page.
 
-- 调度方式：Cron 表达式、延时执行、带时区偏移的绝对时间、固定时间间隔。
-- 动作类型：新建顶层主 Agent 会话、命令行命令或 Shell 脚本调用、系统通知。
-- 会话工具：`auto_schedule_create`、`auto_schedule_update`、`auto_schedule_list`、`auto_schedule_history`、`auto_schedule_delete`。
-- Web 管理：新建、编辑、启停、删除，查看下次执行时间、最近状态、可展开的执行历史和 Agent 会话入口。
-- 持久化：任务定义、运行态和有界执行历史写入 DSH 的 `auto-schedule` Settings 命名空间，重启后恢复。
-- 错过处理：一次性任务在重启后补跑一次；Cron 与固定间隔任务最多补跑一次，然后跳到当前时刻之后的下一个 occurrence，避免积压风暴。
-- 生命周期：插件卸载会清理定时器，并终止本插件当前正在等待的 Shell 调用或 Agent 回合。
+> [!IMPORTANT]
+> The scheduler provides **at-least-once** delivery. A successful shell exit or completed Agent turn confirms only the local execution result; it does not prove that an external business outcome succeeded.
 
-## 主 Agent 动作
+## Overview
 
-选择“主 Agent 任务”后，每个 occurrence 都会创建一个新的顶层 DSH Agent/Session：
+`dsh-b2us-schedule` combines a Host plugin and a Web client in one installable package. An Agent can create and manage schedules through five typed tools, while users can manage the same durable tasks from **Settings → Plugins → Scheduled Tasks**.
 
-1. 使用任务设置的工作目录；留空时不覆盖 Host 的默认目录。
-2. 如果 Session 的实际工作目录与一个已有 DSH 工作区的规范化路径匹配，先将 Session 挂载到该工作区；只按路径复用，不按名称猜测，也不自动创建工作区。
-3. 使用任务指定的 Agent 预设；留空时解析执行时生效的 DSH 默认预设。
-4. 使用执行时生效的默认模型及 reasoning effort，把任务说明作为一个普通用户回合送入 Agent。
-5. 等待 Agent 回合结束或达到超时，然后强制刷新 Session 持久化并释放 live Agent。
-6. 在执行历史中保留 Session id、有效预设和结果；Web 页面可直接打开对应冷会话查看完整过程。
+The npm package and Web module are named `dsh-b2us-schedule`. Stable runtime identifiers remain unchanged for compatibility: the Cordis row and Settings namespace are `auto-schedule`, and the conversation tools keep the `auto_schedule_` prefix.
 
-因此循环任务不会在一个 Agent 上不断累积上下文，每次触发都是隔离的新会话。当前调度器仍全局串行：上一次 Shell/Agent 动作结束后才会开始下一项到期任务；期间错过的固定间隔或 Cron occurrence 最多补跑一次，再跳到未来时间。
+## Rename and compatibility
 
-历史中的“成功”只表示 Agent 回合以 `completed` 正常结束，不等价于网站签到、文件生成等外部业务结果已经成功。任务说明应要求 Agent 明确核验最终状态并保存证据；实际过程和最终答复以历史链接中的 Session 为准。
+`dsh-b2us-schedule` is the new package and repository name for the former `dsh-auto-schedule`. The durable Settings namespace, Cordis row id, tool names, and task schema deliberately remain stable so an existing data document does not need a schema rewrite.
 
-## Shell 能力复用结论
+When migrating an existing Profile, back it up and replace the old package reference with the new package. Do not load both package names in the same Profile: they intentionally declare the same `auto-schedule` Cordis row and Settings namespace.
 
-插件不直接使用 Node `child_process`，也不复制 `tool-bash`。所有命令与系统通知都通过 DSH 公共执行缝 `ctx.shell.resolve()` + `ctx.shell.run()` 执行，因此会继承当前 profile 选择的 ShellExecutor：
+## Highlights
 
-- POSIX 默认进入 DSH Bash 执行器；Windows 默认进入 PowerShell 执行器。
-- 工作目录、超时上限、输出截断和环境清理由当前执行器继续负责。
-- 装载沙箱执行器时，定时命令沿用其 `read-only` / `workspace-write` / `danger-full-access` 策略。
-- 定时触发发生在会话回合之外，不能合法弹出 DSH 审批。因此插件绝不会在到点时自动申请沙箱提权；沙箱拒绝会记录为失败。
+- **Four schedule types:** Cron, one-shot delay, absolute time with an explicit UTC offset, and fixed interval.
+- **Three action types:** a fresh top-level DSH Agent Session, a shell command or script, and a native desktop notification.
+- **Two management surfaces:** typed conversation tools and a localized Web settings page.
+- **Durable state:** task definitions, runtime state, and bounded run history are stored in the DSH Settings service and restored after restart.
+- **Controlled recovery:** a missed one-shot task runs once after restart; a missed Cron or interval schedule catches up at most once before advancing to its next future occurrence.
+- **Lifecycle cleanup:** unload, disable, delete, and execution-definition changes cancel affected timers or active work through DSH lifecycle signals.
+- **Honest execution records:** outcomes, exit codes, bounded output, errors, timeouts, sandbox denial, and Agent Session links are retained per occurrence.
 
-通过会话创建、启用或修改一个会实际运行的 Shell 或 Agent 任务时，插件在 `tools/pre-execute` 返回标准 `ask` 决策，先走 DSH 一次性审批。Web 页面中的同类操作属于用户直接操作，页面会再次显示无人值守执行确认。Agent 到点后不会绕过工具审批或自动扩大权限；若任务所需工具要求交互审批，回合会等待用户处理并可能最终超时。
+## Scheduling model
 
-## 调度语义
-
-| 类型 | 输入 | 行为 |
+| Type | Input | Behavior |
 |---|---|---|
-| Cron | `cron_expression` + 可选 `time_zone` | 支持 Croner 的 5/6/7 段表达式与 IANA 时区 |
-| 延时 | `after_seconds` | 从创建或改动执行定义的时间起，延时后执行一次 |
-| 绝对时间 | `at` | 要求带 `Z` 或数字偏移的 ISO 时间，内部规范化为 UTC |
-| 固定间隔 | `every_seconds` | 按最近一次执行定义更新时间锚定；跳过错过的中间 occurrence |
+| Cron | `cron_expression` and optional `time_zone` | Croner-compatible 5-, 6-, or 7-field expression with an IANA time zone |
+| Delay | `after_seconds` | Runs once after a positive delay measured from creation or an execution-definition update |
+| Absolute time | `at` | Runs once at a future ISO date-time containing `Z` or a numeric UTC offset; stored as UTC |
+| Fixed interval | `every_seconds` | Repeats from the latest execution-definition update and skips intermediate missed occurrences |
 
-`minIntervalSeconds` 默认 1 秒，只约束 Cron 的实际周期与固定间隔；一次性延时同样只要求正整数。该字段是部署策略而非 Croner 的技术限制，生产环境如需限制高频任务可以主动调高。单进程内同一时刻到期的任务按计划时间串行执行。当前交付语义为 at-least-once：进程在命令完成后、运行态落盘前崩溃时，重启可能再次执行该 occurrence；不要把非幂等命令误认为 exactly-once。
+Cron and fixed-interval schedules must respect `minIntervalSeconds`. The default is 1 second; production deployments should raise it when high-frequency work is not appropriate. Due tasks are executed serially in scheduled-time order within one Host process.
 
-每个任务按最新优先持久化最近 `maxHistoryEntriesPerTask` 次执行结果，默认 50、配置范围 1–1000。记录包含计划/开始/结束时间、结果、退出码、失败原因、Agent Session/预设，以及受 `shellOutputMaxBytes` 限制的 stdout/stderr。`auto_schedule_list` 只返回最近结果与历史数量；需要完整记录时使用 `auto_schedule_history` 按任务和条数读取，避免普通列表无限扩大模型上下文。删除任务后，其 Host runtime 与历史也会在调度器 reconcile 时清理。
+## Actions
 
-## 系统通知
+### Fresh Agent Session
 
-- macOS：通过 DSH Shell 执行 `/usr/bin/osascript`。
-- Linux：通过 DSH Shell 调用 `notify-send`，宿主需安装对应桌面通知工具。
-- Windows：通过 DSH PowerShell 执行器创建 `System.Windows.Forms.NotifyIcon` 气泡通知。
+Every Agent occurrence creates a new top-level DSH Agent and Session:
 
-通知同样受 Shell 沙箱约束。桌面会话、通知权限或依赖缺失会形成可见失败，不会被伪装为成功。
+1. The task working directory is used when supplied; otherwise the Host default is preserved.
+2. If the resolved Session path exactly matches an existing DSH workspace, the Session is attached to that workspace. The plugin never guesses by display name or creates a workspace automatically.
+3. The requested Agent preset is used, or the effective DSH default is resolved at execution time.
+4. The effective default model and reasoning effort are installed, and the task prompt is delivered as a normal user turn.
+5. The plugin waits for completion, cancellation, or timeout, flushes the Session, and releases the live Agent.
+6. The run record retains the Session id and effective preset so the full cold Session can be opened from the Web page.
 
-## 构建与测试
+Recurring tasks therefore do not accumulate context in one Agent. The scheduler is currently global and serial: another due shell or Agent action starts only after the active occurrence finishes.
 
-要求 Node.js `^22.19.0 || >=24.0.0`，并与 DSH `0.1.2-alpha.2` 配套。
+An Agent outcome of `succeeded` means the turn ended with `completed`. Task prompts should explicitly require final-state verification and an evidence path when the real goal is an external result such as a website check-in or generated file.
+
+### Shell command or script
+
+The plugin never calls Node.js `child_process` directly and does not copy `tool-bash`. It resolves and runs every command through `ctx.shell`, so the selected DSH ShellExecutor continues to own the working directory, environment cleanup, output limits, timeout caps, and sandbox policy.
+
+- POSIX hosts normally use the DSH Bash executor.
+- Windows hosts normally use the DSH PowerShell executor.
+- A sandbox rejection is recorded as a failure; a scheduled occurrence never requests automatic elevation.
+
+### Desktop notification
+
+Notifications also run through the active DSH ShellExecutor:
+
+| Platform | Adapter |
+|---|---|
+| macOS | `/usr/bin/osascript` |
+| Linux | `notify-send` (must be installed and available to the desktop session) |
+| Windows | PowerShell with `System.Windows.Forms.NotifyIcon` |
+
+Missing desktop sessions, permissions, executables, or sandbox access produce visible failures rather than synthetic success.
+
+## Conversation tools
+
+| Tool | Purpose |
+|---|---|
+| `auto_schedule_create` | Create a durable schedule and action |
+| `auto_schedule_update` | Change, enable, or disable a task by its exact id |
+| `auto_schedule_list` | List tasks with compact next-run and latest-result projections |
+| `auto_schedule_history` | Read bounded execution history and output for one task |
+| `auto_schedule_delete` | Delete a task and its associated runtime history |
+
+Example requests:
+
+- “Run `./scripts/backup.sh` in `/srv/app` ten minutes from now.”
+- “At 9:00 every day in `Asia/Shanghai`, send a desktop notification reminding me to review the daily report.”
+- “At 8:00 every day, start a fresh main Agent in `/Users/me/tests`, use the default preset, and time out after 15 minutes.”
+- “Disable the task I just created.”
+- “List every scheduled task and its next occurrence.”
+
+Always use the exact task id returned by the tool when updating or deleting a task.
+
+## Web management
+
+After the Web profile restarts with the plugin installed, open **Settings → Plugins → Scheduled Tasks**. The localized page supports:
+
+- creating and editing schedules and actions;
+- enabling, disabling, and deleting tasks;
+- inspecting the next occurrence and latest state;
+- expanding bounded execution history;
+- opening the persisted Agent Session associated with an Agent occurrence;
+- revision-conflict detection and refresh instead of silent overwrite.
+
+Saving an enabled shell or Agent task from the Web page requires an explicit unattended-execution confirmation.
+
+## Quick start
+
+### Requirements
+
+- Node.js `^22.19.0 || >=24.0.0`
+- DeepSeek Harness `0.1.2-alpha.2`
+- Cordis `4.0.2`
+
+The exact DSH and Cordis peer versions are declared in `package.json`.
+
+### Build and verify
 
 ```bash
 npm install
 npm run check
 ```
 
-常用命令：
+`npm run check` runs strict type checking, behavior tests, coverage gates, the production build, and built-package/packaging tests.
+
+### Pack and install
+
+```bash
+npm run build
+npm pack
+dsh plugin --profile web add ./dsh-b2us-schedule-0.3.2.tgz
+dsh --profile web --dump-config
+```
+
+The tarball bundles the `croner` runtime dependency, so it can be installed into a fresh Profile without accessing the npm registry. DSH and Cordis remain Host-provided peer dependencies and are not duplicated inside the package.
+
+The package declares both `dsh.bundle.patch` and `dsh.client`. Installing it adds the Host row and lets the Web profile discover the client from the same package; no DeepSeek Harness source change or rebuild is required.
+
+## Persistence and recovery
+
+The `auto-schedule` Settings namespace separates user-owned and Host-owned data:
+
+- `tasks[]` contains schedule definitions managed by the Web page and conversation tools.
+- `runtime[]` contains next-run state, the latest result, and newest-first bounded history managed by the Host scheduler.
+- `revision` changes for every edit; `executionRevision` changes only when enablement, timing, or the action changes.
+
+Each task retains up to `maxHistoryEntriesPerTask` results (default 50, allowed range 1–1000). `auto_schedule_list` exposes only the latest result and history count; use `auto_schedule_history` to fetch detailed records without expanding ordinary model context indefinitely.
+
+Delivery is at-least-once. If the Host crashes after an action finishes but before runtime state is persisted, that occurrence may run again after restart. Commands with external effects must provide their own idempotency key, lock, or transaction protection.
+
+## Configuration
+
+The package-owned `cordis.patch.yml` supplies a complete default row:
+
+| Field | Default | Purpose |
+|---|---:|---|
+| `allowShellActions` | `true` | Allow shell schedules |
+| `allowAgentActions` | `true` | Allow fresh-Agent schedules |
+| `defaultTimeZone` | `UTC` | Time zone used when a Cron task omits one |
+| `minIntervalSeconds` | `1` | Minimum Cron cadence and fixed interval |
+| `maxHistoryEntriesPerTask` | `50` | Newest-first retained results per task; maximum 1000 |
+| `maxShellTimeoutMs` | `600000` | Host policy cap for one shell action |
+| `defaultAgentTimeoutMs` | `900000` | Default Agent occurrence timeout |
+| `maxAgentTimeoutMs` | `3600000` | Maximum Agent occurrence timeout |
+| `maxAgentPromptBytes` | `65536` | Maximum UTF-8 Agent prompt size |
+| `shellOutputMaxBytes` | `16384` | Persisted stdout/stderr budget |
+| `maxCommandBytes` | `32768` | Maximum UTF-8 shell command size |
+| `maxNotificationBytes` | `8192` | Maximum UTF-8 notification payload size |
+| `notificationTimeoutMs` | `15000` | Notification adapter timeout |
+| `schedulerRetryMs` | `5000` | Delay before retrying a failed scheduler drive |
+
+DSH patch overrides replace the complete config object rather than deep-merging it. When changing `defaultTimeZone` to a local zone such as `Asia/Shanghai`, preserve every other field your deployment still needs.
+
+## Approval and security model
+
+Scheduled shell and Agent actions are durable unattended authority, so the plugin keeps creation-time approval separate from execution-time policy:
+
+1. Creating, enabling, or materially changing an active shell or Agent task through conversation tools returns the standard DSH `ask` decision before storage.
+2. At occurrence time, shell work remains confined by the active ShellExecutor. A timer cannot open an interactive privilege-elevation flow.
+3. A scheduled Agent inherits its preset, model, tools, permission rules, and ordinary tool approvals. The plugin does not approve those tools on the Agent's behalf.
+4. Web edits use direct-user confirmation, while the Host still validates the complete Settings document and policy limits.
+
+Do not turn commands or Agent prompts copied from untrusted web pages, email, or tool output into persistent unattended tasks without reviewing them. Avoid printing credentials because bounded stdout and stderr are stored in run history until the task is deleted.
+
+See [docs/SECURITY.md](docs/SECURITY.md) for the threat model and deployment guidance.
+
+## Development commands
 
 ```bash
 npm run typecheck
@@ -79,62 +201,31 @@ npm run test:built
 npm pack --dry-run
 ```
 
-构建会生成：
+Build outputs:
 
-- `lib/index.js`：Host 插件。
-- `lib/invariant.js`：包自有 invariant companion。
-- `lib/client.js`：符合 `window.__ModuleLoader__.load({ id, factory })` 契约的 lazy-CJS Web 插件。
-- `lib/types/`：Host 与 Client 类型声明。
+- `lib/index.js` — Host plugin
+- `lib/invariant.js` — package-owned invariant companion
+- `lib/client.js` — lazy-CJS Web client for `window.__ModuleLoader__`
+- `lib/types/` — Host and client type declarations
 
-测试分层与本地 Web 验收见 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)，架构见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，安全边界见 [docs/SECURITY.md](docs/SECURITY.md)。
+Further reading:
 
-## 安装
+- [Architecture](docs/ARCHITECTURE.md)
+- [Security model](docs/SECURITY.md)
+- [Development and test workflow](docs/DEVELOPMENT.md)
+- [Recorded verification evidence](docs/VERIFICATION.md)
 
-```bash
-npm run build
-npm pack
-dsh plugin --profile web add ./dsh-auto-schedule-0.3.2.tgz
-dsh --profile web --dump-config
-```
+## Known limitations
 
-发布 tarball 会内置 `croner` 运行时依赖，因此可以由桌面壳的离线安装页在全新 Profile 中安装；安装过程不需要访问 npm registry。DSH/Cordis 单例仍通过 peer dependency 使用宿主版本，不会被复制进插件包。
-
-包同时声明 `dsh.bundle.patch` 与 `dsh.client`。安装并重启 Web profile 后，bundle patch 插入 Host 行；Web 插件表从同一个已加载包发现 `./client`，因此不需要修改或重新构建 DeepSeek Harness 仓库。
-
-默认时区为 `UTC`。中国本地部署可在 profile/home patch 中完整覆盖该行的 `config`，将 `defaultTimeZone` 改为 `Asia/Shanghai`。DSH patch 替换整份 config 而非深合并，覆盖时应保留仍需使用的字段。
-
-## 会话示例
-
-- “10 分钟后执行 `./scripts/backup.sh`，工作目录是 `/srv/app`。”
-- “每天 Asia/Shanghai 时区上午 9 点发系统通知，提醒我查看日报。”
-- “每天 8 点创建一个主 Agent，在 `/Users/me/tests` 目录执行 Chrome 签到验收；使用默认预设，15 分钟超时。”
-- “把刚才的任务停用。”
-- “列出所有定时任务和下次执行时间。”
-
-Chrome 控制验收示例的 Agent 任务说明可直接写为：
-
-```text
-使用 dsh-auto-chrome-tool 控制我当前连接的 Chrome，执行以下验收：
-1. 新建标签页并打开 https://ikuuu.club/。
-2. 使用第一个域名并点击“访问网站”，进入新登录标签页。
-3. 如果账号密码未自动填充，从当前工作目录的 iku-act.txt 读取第一行账号、第二行密码并填写；不得在回复或日志中输出凭据。
-4. 点击“点我开始验证”，验证通过后点击登录。
-5. 登录成功后点击“每日签到”，核验签到成功状态。
-6. 将最终成功页面截图保存到当前工作目录，并在最终答复中写明截图的绝对路径和页面上的成功证据；若未成功，明确报告失败步骤，不得把仅完成 Agent 回合当作业务成功。
-```
-
-将任务工作目录设置为包含 `iku-act.txt` 的测试目录。模型应使用工具返回的精确任务 id 进行修改和删除。命令、任务说明或脚本内容来自不可信网页、邮件或工具结果时，不应直接创建持久无人值守任务。
-
-## 已知边界
-
-- 当前为单 Host 进程调度器，没有跨多实例的分布式租约；同一 Settings 文档不得同时由多个 DSH Host 执行。
-- 保证 at-least-once，不保证 exactly-once；涉及转账、删除、发布等动作时，脚本自身必须提供幂等键或事务保护。
-- 每个任务只保留配置上限内的最近执行历史；单次大输出仍由 DSH ShellExecutor 的截断/溢出策略决定。
-- 每次 Agent occurrence 都会使用当前默认模型，可能产生模型和外部工具费用；周期设置应与成本预算匹配。
-- Agent 任务没有审批旁路。无人值守执行碰到必须交互确认的工具调用时，可能停留到任务超时。
-- Agent 工作目录只有在规范化路径与已有 DSH 工作区完全匹配时才会自动归组；未注册路径继续显示为未分组，插件不会代替用户创建工作区。
-- Web 页面使用 DSH Settings 的字段级修订冲突处理；冲突写会失败并刷新最新 Host 状态，不静默覆盖。
+- One Settings document must be scheduled by only one Host process; there is no distributed lease or leader election.
+- Delivery is at-least-once, not exactly-once.
+- The scheduler runs due actions serially rather than concurrently.
+- Agent actions may incur model and external-tool costs on every occurrence.
+- Tools requiring interactive approval can wait until an unattended Agent occurrence times out.
+- Workspace association occurs only when the normalized Session path exactly matches an existing DSH workspace.
+- Native notification availability still depends on the operating system, desktop session, permissions, and sandbox.
+- Repository tests and controlled clocks do not replace real-occurrence, real-notification, Windows-native, paid/live API, or subjective Web UI acceptance.
 
 ## License
 
-MIT
+[MIT](LICENSE)

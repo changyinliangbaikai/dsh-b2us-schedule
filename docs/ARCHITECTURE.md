@@ -5,7 +5,7 @@
 同一个 npm 包发布三个入口：
 
 ```text
-dsh-auto-schedule
+dsh-b2us-schedule
 ├─ .            Host：Settings、Scheduler、ctx.agents、ctx.shell、Tools、approval gate
 ├─ ./client     Web：settings.plugins.tab + settingsScope
 └─ ./invariant  包自有 invariant companion

@@ -23,7 +23,7 @@ describe('DSH dual-face package structure', () => {
 
   it('declares Host, Web client, patch, and publish surfaces', () => {
     expect(packageJson).toMatchObject({
-      name: 'dsh-auto-schedule',
+      name: 'dsh-b2us-schedule',
       type: 'module',
       main: './lib/index.js',
       types: './lib/types/index.d.ts',
@@ -41,7 +41,8 @@ describe('DSH dual-face package structure', () => {
       },
     })
     expect(packageJson.files).toEqual(expect.arrayContaining([
-      'lib/index.js', 'lib/client.js', 'cordis.patch.yml', 'docs', 'README.md', 'LICENSE',
+      'lib/index.js', 'lib/client.js', 'cordis.patch.yml', 'docs',
+      'README.md', 'README.zh-CN.md', 'LICENSE',
     ]))
     for (const path of [
       'lib/index.js', 'lib/invariant.js', 'lib/client.js',
@@ -54,12 +55,21 @@ describe('DSH dual-face package structure', () => {
   it('patches the standard host row with conservative scheduling defaults', () => {
     const patch = readFileSync(join(projectRoot, 'cordis.patch.yml'), 'utf8')
     expect(patch).toContain('id: auto-schedule')
-    expect(patch).toContain('name: dsh-auto-schedule')
+    expect(patch).toContain('name: dsh-b2us-schedule')
     expect(patch).toContain('minIntervalSeconds: 1')
     expect(patch).toContain('maxHistoryEntriesPerTask: 50')
     expect(patch).toContain('maxShellTimeoutMs: 600000')
     expect(patch).toContain('allowAgentActions: true')
     expect(patch).toContain('defaultAgentTimeoutMs: 900000')
+  })
+
+  it('ships mutually linked English and Simplified Chinese READMEs', () => {
+    const english = readFileSync(join(projectRoot, 'README.md'), 'utf8')
+    const chinese = readFileSync(join(projectRoot, 'README.zh-CN.md'), 'utf8')
+    expect(english).toContain('**English** | [简体中文](README.zh-CN.md)')
+    expect(chinese).toContain('[English](README.md) | **简体中文**')
+    expect(english).toContain('# dsh-b2us-schedule')
+    expect(chinese).toContain('# dsh-b2us-schedule')
   })
 
   it('keeps DSH singletons external and Croner as the sole production dependency', () => {
@@ -85,7 +95,7 @@ describe('DSH dual-face package structure', () => {
 
   it('imports the built Host package through its published self-reference', () => {
     const script = [
-      "import('dsh-auto-schedule').then((mod) => {",
+      "import('dsh-b2us-schedule').then((mod) => {",
       "  if (mod.name !== 'auto-schedule') process.exit(2)",
       "  if (typeof mod.apply !== 'function') process.exit(3)",
       "  if ('default' in mod) process.exit(4)",
@@ -110,7 +120,7 @@ describe('DSH dual-face package structure', () => {
   it('emits a loader-safe browser bundle with only React runtime requires', () => {
     const client = readFileSync(join(projectRoot, 'lib/client.js'), 'utf8')
     expect(client).toContain('window.__ModuleLoader__.load({')
-    expect(client).toContain('id: "dsh-auto-schedule"')
+    expect(client).toContain('id: "dsh-b2us-schedule"')
     expect(client).toContain('data-plugin-css')
     expect(client).toContain('.das-page')
     expect(client).toContain('return module.exports;')

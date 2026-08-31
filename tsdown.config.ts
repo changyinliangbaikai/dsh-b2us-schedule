@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { defineConfig, type UserConfig } from 'tsdown'
 
-const PACKAGE_ID = 'dsh-auto-schedule'
-const INLINE_CSS_PREFIX = '\0dsh-auto-schedule-css:'
+const PACKAGE_ID = 'dsh-b2us-schedule'
+const INLINE_CSS_PREFIX = '\0dsh-b2us-schedule-css:'
 const INLINE_CSS_SUFFIX = '.mjs'
 
 function sourceAssetPath(source: string, importer: string): string {
@@ -62,7 +62,7 @@ const clientBundle: UserConfig = {
       || specifier === 'react/jsx-runtime',
   },
   plugins: [{
-    name: 'dsh-auto-schedule-inline-css',
+    name: 'dsh-b2us-schedule-inline-css',
     resolveId(source: string, importer: string | undefined) {
       if (!source.endsWith('.css?inline')) return null
       const stylesheet = source.slice(0, -'?inline'.length)

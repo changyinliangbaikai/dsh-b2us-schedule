@@ -1,8 +1,8 @@
-/** Package-owned invariant companion for dsh-auto-schedule. */
+/** Package-owned invariant companion for dsh-b2us-schedule. */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = 'dsh-auto-schedule'
+const PACKAGE_NAME = 'dsh-b2us-schedule'
 
 export const name = 'auto-schedule-invariant'
 export const inject = ['invariants']

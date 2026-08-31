@@ -10,7 +10,7 @@ import { AutoScheduleSettingsPage } from '../../src/client/AutoScheduleSettingsP
 
 afterEach(() => {
   cleanup()
-  document.head.querySelectorAll('style[data-plugin-css="dsh-auto-schedule"]').forEach(tag => { tag.remove() })
+  document.head.querySelectorAll('style[data-plugin-css="dsh-b2us-schedule"]').forEach(tag => { tag.remove() })
 })
 
 class StubScope implements SettingsScope<AutoScheduleSettings> {
@@ -98,7 +98,7 @@ describe('browser plugin apply', () => {
     expect(entry.options).toMatchObject({ id: 'auto-schedule', order: 30 })
     expect(entry.locale).toBe(NS)
     expect((entry.options.label as () => string)()).toBe('定时任务')
-    expect(document.head.querySelector('style[data-plugin-css="dsh-auto-schedule"]')).not.toBeNull()
+    expect(document.head.querySelector('style[data-plugin-css="dsh-b2us-schedule"]')).not.toBeNull()
     const injected = (entry.inject as () => {
       saveTasks(tasks: readonly AutoScheduleTask[]): Promise<void>
       openSession(id: string): void
@@ -110,7 +110,7 @@ describe('browser plugin apply', () => {
 
     await fiber.dispose()
     expect(test.slots.records).toHaveLength(0)
-    expect(document.head.querySelector('style[data-plugin-css="dsh-auto-schedule"]')).toBeNull()
+    expect(document.head.querySelector('style[data-plugin-css="dsh-b2us-schedule"]')).toBeNull()
     await test.ctx.fiber.dispose()
   })
 })

@@ -1,5 +1,5 @@
 {
-  "name": "dsh-auto-schedule",
+  "name": "dsh-b2us-schedule",
   "version": "0.3.2",
   "description": "Durable conversational and Web-managed scheduled Agent, shell, and system-notification tasks for DeepSeek Harness.",
   "type": "module",
@@ -32,6 +32,7 @@
     "cordis.patch.yml",
     "docs",
     "README.md",
+    "README.zh-CN.md",
     "LICENSE"
   ],
   "scripts": {

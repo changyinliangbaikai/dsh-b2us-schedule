@@ -221,7 +221,7 @@ class DshAgentActionExecutor implements AgentActionExecutor {
       } else {
         handle.agent.followup(createUserMessage({
           content: [{ type: 'text', text: renderAgentTaskFraming(request) }],
-          source: { kind: 'plugin', plugin: 'dsh-auto-schedule' },
+          source: { kind: 'plugin', plugin: 'dsh-b2us-schedule' },
         }))
         const wait = await waitForAgent(
           handle.agent,

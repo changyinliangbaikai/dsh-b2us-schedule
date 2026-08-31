@@ -1,6 +1,6 @@
 - insert:
     - id: auto-schedule
-      name: dsh-auto-schedule
+      name: dsh-b2us-schedule
       config:
         allowShellActions: true
         allowAgentActions: true

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This repository is the independently released `dsh-auto-schedule` out-of-tree plugin for DeepSeek Harness. When checked out inside the integration workspace, the parent `../AGENTS.md` also applies. This file keeps the repository safe when it is opened alone.
+This repository is the independently released `dsh-b2us-schedule` out-of-tree plugin for DeepSeek Harness. When checked out inside the integration workspace, the parent `../AGENTS.md` also applies. This file keeps the repository safe when it is opened alone.
 
 ## Product boundary
 

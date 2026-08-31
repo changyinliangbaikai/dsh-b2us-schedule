@@ -26,10 +26,10 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 function installStyles(): () => void {
   if (typeof document === 'undefined') return () => {}
-  const previous = document.querySelector('style[data-plugin-css="dsh-auto-schedule"]')
+  const previous = document.querySelector('style[data-plugin-css="dsh-b2us-schedule"]')
   if (previous !== null) return () => {}
   const tag = document.createElement('style')
-  tag.dataset.pluginCss = 'dsh-auto-schedule'
+  tag.dataset.pluginCss = 'dsh-b2us-schedule'
   tag.textContent = styles
   document.head.appendChild(tag)
   return () => { tag.remove() }
