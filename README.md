@@ -19,6 +19,12 @@ The npm package and Web module are named `dsh-b2us-schedule`. Stable runtime ide
 
 When migrating an existing Profile, back it up and replace the old package reference with the new package. Do not load both package names in the same Profile: they intentionally declare the same `auto-schedule` Cordis row and Settings namespace.
 
+### Harness 0.1.2-rc.1 compatibility
+
+Version `0.3.3` raises every DSH peer from `0.1.2-alpha.2` to `0.1.2-rc.1` and follows the public Session snapshot API after the live event array became private. The durable task schema, Cordis row, Settings namespace, tool names, and Web route are unchanged.
+
+This upgrade intentionally removes the package's former `./invariant` export. It was an empty companion and Harness `0.1.2-rc.1` no longer permits invariant packages without an independently observable runtime relationship. Consumers that imported `dsh-b2us-schedule/invariant` must remove that row or import; ordinary plugin installation through `cordis.patch.yml` is unchanged.
+
 ## Highlights
 
 - **Four schedule types:** Cron, one-shot delay, absolute time with an explicit UTC offset, and fixed interval.
@@ -115,7 +121,7 @@ Saving an enabled shell or Agent task from the Web page requires an explicit una
 ### Requirements
 
 - Node.js `^22.19.0 || >=24.0.0`
-- DeepSeek Harness `0.1.2-alpha.2`
+- DeepSeek Harness `0.1.2-rc.1`
 - Cordis `4.0.2`
 
 The exact DSH and Cordis peer versions are declared in `package.json`.
@@ -134,7 +140,7 @@ npm run check
 ```bash
 npm run build
 npm pack
-dsh plugin --profile web add ./dsh-b2us-schedule-0.3.2.tgz
+dsh plugin --profile web add ./dsh-b2us-schedule-0.3.3.tgz
 dsh --profile web --dump-config
 ```
 
@@ -204,7 +210,6 @@ npm pack --dry-run
 Build outputs:
 
 - `lib/index.js` — Host plugin
-- `lib/invariant.js` — package-owned invariant companion
 - `lib/client.js` — lazy-CJS Web client for `window.__ModuleLoader__`
 - `lib/types/` — Host and client type declarations
 

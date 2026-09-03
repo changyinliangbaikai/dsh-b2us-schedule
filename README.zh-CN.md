@@ -19,6 +19,12 @@ npm 包名和 Web 模块标识已统一为 `dsh-b2us-schedule`。为保持运行
 
 迁移已有 Profile 前应先备份，并把旧包引用替换为新包。不要在同一个 Profile 中同时加载两个包名：它们有意声明了相同的 `auto-schedule` Cordis 行和 Settings 命名空间。
 
+### Harness 0.1.2-rc.1 兼容性
+
+`0.3.3` 将全部 DSH peer 从 `0.1.2-alpha.2` 升级为 `0.1.2-rc.1`，并在 Session 实时事件数组私有化后改用公开快照 API。持久化任务 schema、Cordis 行、Settings 命名空间、工具名称和 Web 路由均不变。
+
+此次升级会有意移除原有的 `./invariant` 导出。该入口原本只是空 companion，而 Harness `0.1.2-rc.1` 不再允许没有独立可观测运行时关系的 invariant 包。曾显式导入 `dsh-b2us-schedule/invariant` 的使用方必须删除对应行或导入；通过 `cordis.patch.yml` 安装普通插件的方式不变。
+
 ## 核心能力
 
 - **四种调度方式：** Cron、一次性延时、带显式 UTC 偏移的绝对时间、固定时间间隔。
@@ -115,7 +121,7 @@ Web profile 安装插件并重启后，打开 **设置 → 插件 → 定时任�
 ### 环境要求
 
 - Node.js `^22.19.0 || >=24.0.0`
-- DeepSeek Harness `0.1.2-alpha.2`
+- DeepSeek Harness `0.1.2-rc.1`
 - Cordis `4.0.2`
 
 精确的 DSH/Cordis peer 版本声明在 `package.json` 中。
@@ -134,7 +140,7 @@ npm run check
 ```bash
 npm run build
 npm pack
-dsh plugin --profile web add ./dsh-b2us-schedule-0.3.2.tgz
+dsh plugin --profile web add ./dsh-b2us-schedule-0.3.3.tgz
 dsh --profile web --dump-config
 ```
 
@@ -204,7 +210,6 @@ npm pack --dry-run
 构建产物：
 
 - `lib/index.js`：Host 插件
-- `lib/invariant.js`：包自有 invariant companion
 - `lib/client.js`：供 `window.__ModuleLoader__` 加载的 lazy-CJS Web 客户端
 - `lib/types/`：Host 与 Client 类型声明
 

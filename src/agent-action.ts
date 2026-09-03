@@ -239,7 +239,7 @@ class DshAgentActionExecutor implements AgentActionExecutor {
             ...sessionFacts,
           }
         } else {
-          const end = handle.agent.session.events.findLast(event => event.type === 'turn/end')
+          const end = handle.agent.session.snapshotEvents().findLast(event => event.type === 'turn/end')
           result = { ...turnResult(end?.data.reason), ...sessionFacts }
         }
       }

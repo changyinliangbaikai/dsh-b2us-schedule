@@ -54,7 +54,7 @@ describe('DSH Agent action executor', () => {
       id: SessionId('session-agent-test'),
       session: {
         header: { id: SessionId('session-agent-test'), cwd: '/workspace/browser' },
-        events: [{ type: 'turn/end', data: { reason: { kind: 'completed' } } }],
+        snapshotEvents: () => [{ type: 'turn/end', data: { reason: { kind: 'completed' } } }],
       },
       followup: (...args: unknown[]) => {
         lifecycleOrder.push('followup')
@@ -121,7 +121,7 @@ describe('DSH Agent action executor', () => {
       id: SessionId('session-agent-unowned'),
       session: {
         header: { id: SessionId('session-agent-unowned'), cwd: '/workspace/unowned' },
-        events: [{ type: 'turn/end', data: { reason: { kind: 'completed' } } }],
+        snapshotEvents: () => [{ type: 'turn/end', data: { reason: { kind: 'completed' } } }],
       },
       followup,
       cancel: vi.fn(),
@@ -155,7 +155,7 @@ describe('DSH Agent action executor', () => {
       id: SessionId('session-agent-attach-failure'),
       session: {
         header: { id: SessionId('session-agent-attach-failure'), cwd: '/workspace/browser' },
-        events: [],
+        snapshotEvents: () => [],
       },
       followup,
       cancel: vi.fn(),
@@ -195,7 +195,7 @@ describe('DSH Agent action executor', () => {
     const cancel = vi.fn(() => { releaseIdle?.() })
     const agent = {
       id: SessionId('session-agent-timeout'),
-      session: { events: [] },
+      session: { snapshotEvents: () => [] },
       followup: vi.fn(),
       cancel,
       whenIdle: () => idle,

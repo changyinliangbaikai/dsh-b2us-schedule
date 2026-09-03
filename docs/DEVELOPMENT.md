@@ -5,7 +5,7 @@
 - `npm run typecheck`：严格 TypeScript，启用 `noUncheckedIndexedAccess` 与 `exactOptionalPropertyTypes`。
 - `npm test`：纯领域、定时器、工具、真实 Cordis 生命周期、Client 组件与 Slot 组合测试。
 - `npm run test:coverage`：V8 覆盖率门禁；当前最低 85% statements/functions/lines、75% branches。
-- `npm run build`：先由 `tsc` 生成类型与可追踪中间文件，再由 tsdown 分别构建 Host、invariant 和 lazy-CJS Client。
+- `npm run build`：先由 `tsc` 生成类型与可追踪中间文件，再由 tsdown 分别构建 Host 和 lazy-CJS Client；没有独立运行时关系时不发布空 invariant companion。
 - `npm run test:built`：普通 Node 加载发布入口，并检查 client factory、exports、bundle patch 与发布文件。
 - `npm run check`：串行执行全部本地门禁。
 - `npm pack --dry-run`：人工审阅发布清单，不把源码、测试、coverage 或开发依赖带入包，并确认 `croner` 作为 bundled dependency 进入离线 tarball。
@@ -24,7 +24,7 @@
 
 - 所有注册必须由当前 Cordis fiber/effect 拥有，并提供 disposer。
 - Client 不允许把 `ctx` 传进 React；数据只能走 Slot inject、selector hook 和 SettingsScope action。
-- 不引入私有 DSH 源码路径。依赖精确锁定到已验证的公共 `0.1.2-alpha.2` 接口。
+- 不引入私有 DSH 源码路径。依赖精确锁定到已验证的公共 `0.1.2-rc.1` 接口。
 - 不用 `tool-bash` 或 ToolRuntime 伪造定时调用；命令执行只走 `ctx.shell`，Agent 只走 `ctx.agents.create` 和 `ctx.sessions.flush`。
 - Settings 的 `tasks` 与 `runtime` 顶层字段必须分别写入，避免不同 owner 的整段替换。
 - 每个修复都添加回归用例；不通过削弱断言或忽略失败让门禁变绿。

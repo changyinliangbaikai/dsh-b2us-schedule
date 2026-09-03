@@ -1,15 +1,16 @@
 # 架构
 
-## 双插件面
+## Host 与 Web 双面包
 
-同一个 npm 包发布三个入口：
+同一个 npm 包发布两个运行时入口：
 
 ```text
 dsh-b2us-schedule
 ├─ .            Host：Settings、Scheduler、ctx.agents、ctx.shell、Tools、approval gate
-├─ ./client     Web：settings.plugins.tab + settingsScope
-└─ ./invariant  包自有 invariant companion
+└─ ./client     Web：settings.plugins.tab + settingsScope
 ```
+
+本包不发布 `./invariant`：持久化 Settings 写入会在其真实解析和 owner 校验边界验证，当前没有第二份可独立漂移的运行时事实可供 invariant 比对。空 companion 会制造虚假的健康信号，因此在 Harness `0.1.2-rc.1` 基线中明确省略。
 
 Host 与 Web 不通过自定义私有 RPC 通信。Host 注册 `auto-schedule` Settings 命名空间，Web 使用 DSH 标准 `ctx.settingsScope.bind({ namespace: 'auto-schedule' })` 订阅并写入 `tasks` 字段。Host 只写 `runtime` 字段。两类写由 SettingsProvider 的串行持久化与 revision fence 协调，减少 task/runtime 互相覆盖。
 
@@ -49,6 +50,7 @@ scheduled Agent action
   → matchingWorkspace?.attachSession(sessionId)
   → agent.followup(user message)
   → agent.whenIdle() / timeout / AbortSignal
+  → session.snapshotEvents() reads the completed turn
   → ctx.sessions.flush(session)
   → AgentHandle.dispose()
   → runtime.history[] records session id + effective preset

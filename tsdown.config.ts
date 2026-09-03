@@ -20,7 +20,6 @@ const hostExternals = [
   '@deepseek-ai/dsh-agent',
   '@deepseek-ai/dsh-agent-default-model',
   '@deepseek-ai/dsh-agent-presets',
-  '@deepseek-ai/dsh-invariants',
   '@deepseek-ai/dsh-llm',
   '@deepseek-ai/dsh-session',
   '@deepseek-ai/dsh-session-title',
@@ -86,6 +85,5 @@ const clientBundle: UserConfig = {
 
 export default defineConfig([
   nodeBundle('lib/types/index.js'),
-  nodeBundle('lib/types/invariant.js'),
   clientBundle,
 ])

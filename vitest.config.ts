@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/client/assets.d.ts', 'src/invariant.ts'],
+      exclude: ['src/client/assets.d.ts'],
       reporter: ['text', 'json-summary'],
       thresholds: {
         statements: 85,

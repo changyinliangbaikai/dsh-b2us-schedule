@@ -19,6 +19,7 @@ This repository is the independently released `dsh-b2us-schedule` out-of-tree pl
 - All timers, listeners, in-flight Shell work, Agent turns, and Web contributions require lifecycle disposal. Reconcile state deterministically after load, update, restart, disable, delete, and unload.
 - Validate cron/time-zone/absolute-time/interval inputs, durable data, action payloads, byte limits, timeouts, and renderer input at their actual trust boundaries.
 - Deployment-varying values belong in the validated `Config` and complete `cordis.patch.yml` row. Do not hide operational tunables in constants.
+- Publish an `./invariant` entry only when it can compare independent runtime observations that may diverge. This package currently has no such relationship, so an empty companion is forbidden.
 - Update README, architecture, security, development, verification notes, schemas, and user-facing locale strings with the behavior they describe.
 
 ## Testing constraints
@@ -26,14 +27,14 @@ This repository is the independently released `dsh-b2us-schedule` out-of-tree pl
 - Run focused tests while developing. Before handoff run `npm run check`.
 - Keep `npm run check` covering type checking, unit/integration behavior, coverage, built Host/Web output, and packed-package tests.
 - Every bug fix adds a regression test. Test occurrence boundaries, time zones, missed-run policy, concurrent due order, persistence recovery, bounded history, cancellation, timeout, cleanup, and invalid durable data where affected.
-- Verify the packed tarball contains Host and invariant entries, Web client, type declarations, source maps, `cordis.patch.yml`, and docs. Source-tree success is insufficient.
+- Verify the packed tarball contains the Host entry, Web client, type declarations, source maps, `cordis.patch.yml`, and docs, and does not resurrect an empty invariant companion. Source-tree success is insufficient.
 - Keep timing tests deterministic; use controlled clocks for calculation tests. A controlled-clock test does not replace a real occurrence acceptance check.
 - Never weaken assertions, coverage, sandbox/approval behavior, or persistence checks to obtain a passing gate.
 
 ## Acceptance constraints
 
 1. Pack the plugin and install that `.tgz` into a fresh DSH Web profile at the exact supported Harness version.
-2. Verify package discovery, Cordis/invariant rows, Web client/settings page, tool catalog, and clean Host shutdown from the installed package.
+2. Verify package discovery, the Cordis row, Web client/settings page, tool catalog, and clean Host shutdown from the installed package.
 3. Install `dsh-auto-chrome-tool` into the same profile and verify ids, routes, settings, config, tools, and lifecycle coexist.
 4. Exercise create, update, enable/disable, delete, next occurrence, actual trigger, bounded history, restart recovery, and cleanup.
 5. Exercise Shell, Agent, and notification actions separately. Verify approval before unattended privileged work, denial, cancellation, timeout, sandbox rejection, and honest result reporting.

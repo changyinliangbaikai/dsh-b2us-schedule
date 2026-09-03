@@ -44,12 +44,14 @@ describe('DSH dual-face package structure', () => {
       'lib/index.js', 'lib/client.js', 'cordis.patch.yml', 'docs',
       'README.md', 'README.zh-CN.md', 'LICENSE',
     ]))
+    expect(packageJson.exports).not.toHaveProperty('./invariant')
     for (const path of [
-      'lib/index.js', 'lib/invariant.js', 'lib/client.js',
+      'lib/index.js', 'lib/client.js',
       'lib/types/index.d.ts', 'lib/types/client/index.d.ts',
     ]) {
       expect(existsSync(join(projectRoot, path)), `missing ${path}`).toBe(true)
     }
+    expect(existsSync(join(projectRoot, 'lib/invariant.js'))).toBe(false)
   })
 
   it('patches the standard host row with conservative scheduling defaults', () => {
@@ -108,13 +110,10 @@ describe('DSH dual-face package structure', () => {
     expect(result.status, result.stderr || result.stdout).toBe(0)
   })
 
-  it('imports both built Node entry points without a TypeScript loader', async () => {
+  it('imports the built Host entry point without a TypeScript loader', async () => {
     const host = await import(pathToFileURL(join(projectRoot, 'lib/index.js')).href)
-    const invariant = await import(pathToFileURL(join(projectRoot, 'lib/invariant.js')).href)
     expect(host).toMatchObject({ name: 'auto-schedule', apply: expect.any(Function) })
     expect('default' in host).toBe(false)
-    expect(invariant).toMatchObject({ name: 'auto-schedule-invariant', apply: expect.any(Function) })
-    expect('default' in invariant).toBe(false)
   })
 
   it('emits a loader-safe browser bundle with only React runtime requires', () => {
